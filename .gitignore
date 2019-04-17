@@ -1,6 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
 
+data/*
+!data/dogs-vs-cats/sample_*
+
 .idea
 
 # Byte-compiled / optimized / DLL files
