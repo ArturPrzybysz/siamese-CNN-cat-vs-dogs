@@ -1,7 +1,19 @@
 import os
+from os.path import join
 from PIL import Image
 
 from src.model_config import IMAGE_EXTENSION
+
+
+def split_test(directory):
+    dog_directory = join(directory, "dogs")
+    cat_directory = join(directory, "cats")
+    for file in os.listdir(directory):
+        old_place = join(directory, file)
+        if file.startswith("dog."):
+            os.rename(old_place, join(dog_directory, file))
+        if file.startswith("cat."):
+            os.rename(old_place, join(cat_directory, file))
 
 
 def show_images(images):

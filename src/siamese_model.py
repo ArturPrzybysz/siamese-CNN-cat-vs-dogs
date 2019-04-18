@@ -33,7 +33,7 @@ def get_siamese_model(input_shape, encoding_size):
     model.add(Flatten())
 
     model.add(Dense(512, activation='sigmoid', kernel_initializer=glorot_normal()))
-    
+
     model.add(Dense(encoding_size, activation='relu', name='embedding'))
     model.add(Lambda(lambda x: K.l2_normalize(x, axis=1), name='t_emb_1_l2norm'))
 
