@@ -1,8 +1,9 @@
 from tensorflow.python.keras import Input, Sequential, Model
 from tensorflow.python.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Lambda
-from tensorflow.python.keras.optimizers import Adam
+from tensorflow.python.keras.optimizers import Adam, RMSprop
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.initializers import glorot_normal
+from tensorflow.python.keras.layers import Dropout
 
 from src.model_config import MARGIN, LR
 
@@ -24,10 +25,11 @@ def siamese_model(input_shape, encoding_size):
 
     model = Sequential()
 
-    model.add(Conv2D(32, (8, 8), activation='relu', input_shape=input_shape, kernel_initializer=glorot_normal()))
+    model.add(Conv2D(24, (5, 5),
+                     activation='relu', input_shape=input_shape, kernel_initializer=glorot_normal()))
     model.add(MaxPooling2D())
 
-    model.add(Conv2D(48, (5, 5), activation='relu', kernel_initializer=glorot_normal()))
+    model.add(Conv2D(32, (4, 4), activation='relu', kernel_initializer=glorot_normal()))
     model.add(MaxPooling2D())
 
     model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer=glorot_normal()))
@@ -36,7 +38,8 @@ def siamese_model(input_shape, encoding_size):
     model.add(Conv2D(82, (2, 2), activation='relu', kernel_initializer=glorot_normal()))
     model.add(Flatten())
 
-    model.add(Dense(256, activation='sigmoid', kernel_initializer=glorot_normal()))
+    model.add(Dense(64, activation='sigmoid', kernel_initializer=glorot_normal()))
+    model.add(Dropout(0.5))
 
     model.add(Dense(encoding_size, activation='relu', name='embedding'))
     model.add(Lambda(lambda x: K.l2_normalize(x, axis=1), name='l2_norm'))
@@ -54,7 +57,7 @@ def siamese_model(input_shape, encoding_size):
         ([positive_dist, negative_dist, encodings_dist])
 
     model = Model([anchor_input, positive_input, negative_input], stacked_dists, name='siamese')
-    model.compile(optimizer=Adam(lr=LR), loss=_triplet_loss, metrics=["accuracy"])
+    model.compile(optimizer=RMSprop(lr=LR), loss=_triplet_loss, metrics=["accuracy"])
 
     return model
 

@@ -12,13 +12,13 @@ def hard_triples(data_dir: str, model: Model, triples_count: int):
     dog_dir = join(data_dir, "dogs")
     cat_dir = join(data_dir, "cats")
 
-    imgs_per_iteration_per_class = triples_count
+    imgs_per_iteration_per_class = triples_count//2
 
     anchors = []
     positives = []
     negatives = []
 
-    for i in np.arange(2):
+    for i in np.arange(10):
         dog_anchor_images = read_random_images_from_directory(dog_dir, imgs_per_iteration_per_class)
         cat_anchor_images = read_random_images_from_directory(cat_dir, imgs_per_iteration_per_class)
 
