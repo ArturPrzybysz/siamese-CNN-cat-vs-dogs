@@ -7,8 +7,24 @@ from src.model_config import IMAGE_WIDTH, IMAGE_HEIGHT, NUM_CHANNELS, MARGIN
 
 from tensorflow.python.keras import Model
 
+from src.utils import prediction_to_positive_dist, prediction_to_negative_dist
+
+
+def hard_triples(data_dir: str, model: Model, triples_count: int):
+    def hard_triples_condition(positive_dist, negative_dist, margin):
+        return negative_dist < positive_dist
+
+    return _triples_on_condition(hard_triples_condition, data_dir, model, triples_count)
+
 
 def semi_hard_triples(data_dir: str, model: Model, triples_count: int):
+    def semi_hard_triples_condition(positive_dist, negative_dist, margin):
+        return positive_dist < negative_dist < positive_dist + margin
+
+    return _triples_on_condition(semi_hard_triples_condition, data_dir, model, triples_count)
+
+
+def _triples_on_condition(condition, data_dir: str, model: Model, triples_count: int):
     dog_dir = join(data_dir, "dogs")
     cat_dir = join(data_dir, "cats")
 
@@ -34,10 +50,10 @@ def semi_hard_triples(data_dir: str, model: Model, triples_count: int):
 
         predictions = model.predict([np.array(tmp_anchors), np.array(tmp_positives), np.array(tmp_negatives)])
         for j in np.arange(len(predictions)):
-            positive_dist = predictions[j, 0, 0]
-            negative_dist = predictions[j, 1, 0]
+            positive_dist = prediction_to_positive_dist(predictions[j])
+            negative_dist = prediction_to_negative_dist(predictions[j])
 
-            if positive_dist < negative_dist < positive_dist + MARGIN:
+            if condition(positive_dist, negative_dist, MARGIN):
                 anchors.append(tmp_anchors[i])
                 positives.append(tmp_positives[i])
                 negatives.append(tmp_negatives[i])

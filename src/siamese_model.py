@@ -15,7 +15,7 @@ def _triplet_loss(_, y_pred):
 
     basic_loss = K.square(positive_dist) - K.square(negative_dist) + margin
 
-    return K.sum(K.maximum(K.constant(0), basic_loss))
+    return K.mean(K.maximum(K.constant(0), basic_loss))
 
 
 def siamese_model(input_shape, encoding_size):
@@ -36,7 +36,7 @@ def siamese_model(input_shape, encoding_size):
     model.add(MaxPooling2D())
     model.add(Flatten())
 
-    model.add(Dense(1024, activation='sigmoid', kernel_initializer=glorot_normal()))
+    model.add(Dense(512, activation='sigmoid', kernel_initializer=glorot_normal()))
     model.add(Dropout(0.3))
 
     model.add(Dense(encoding_size, activation='relu', name='embedding'))
