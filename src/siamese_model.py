@@ -4,6 +4,7 @@ from tensorflow.python.keras.optimizers import Adam, RMSprop
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.initializers import glorot_normal
 from tensorflow.python.keras.layers import Dropout
+from tensorflow.python.keras.applications import MobileNet
 
 from src.model_config import MARGIN, LR
 
@@ -23,19 +24,12 @@ def siamese_model(input_shape, encoding_size):
     positive_input = Input(input_shape, name="positive_input")
     negative_input = Input(input_shape, name="negative_input")
 
+    mobile = MobileNet(input_shape=input_shape, include_top=False, weights='imagenet', alpha=0.25)
+
     model = Sequential()
+    model.add(mobile)
 
-    model.add(Conv2D(32, (7, 7),
-                     activation='relu', input_shape=input_shape, kernel_initializer=glorot_normal()))
-    model.add(MaxPooling2D())
-
-    model.add(Conv2D(64, (5, 5), activation='relu', kernel_initializer=glorot_normal()))
-    model.add(MaxPooling2D())
-
-    model.add(Conv2D(128, (3, 3), activation='relu', kernel_initializer=glorot_normal()))
-    model.add(MaxPooling2D())
     model.add(Flatten())
-
     model.add(Dense(512, activation='sigmoid', kernel_initializer=glorot_normal()))
     model.add(Dropout(0.3))
 

@@ -1,7 +1,7 @@
 import numpy as np
 
 from paths import TRAIN_DIR, VALID_DIR
-from src.data_generator.triples_creator import random_triples, semi_hard_triples
+from src.data_generator.triples_creator import random_triples, semi_hard_triples, hard_triples
 from src.evaluate_model import evaluate_model
 from src.model_config import INPUT_SHAPE, TRAIN_TRIPLES, VALID_TRIPLES, BATCH_SIZE, EPOCHS, MARGIN, EMBEDDING_SIZE
 from src.siamese_model import siamese_model
@@ -20,9 +20,9 @@ current_score = 0
 accuracies = []
 
 for epoch in range(EPOCHS):
-    history = model.fit([anchors, positives, negatives], Y_train, epochs=4, batch_size=BATCH_SIZE, shuffle=True)
+    history = model.fit([anchors, positives, negatives], Y_train, epochs=5, batch_size=BATCH_SIZE, shuffle=True)
 
-    anchors, positives, negatives, high_margin = semi_hard_triples(TRAIN_DIR, model, triples_count=TRAIN_TRIPLES)
+    anchors, positives, negatives = hard_triples(TRAIN_DIR, model, triples_count=TRAIN_TRIPLES)
 
     accuracy = evaluate_model(model, evaluation_triplets)
 

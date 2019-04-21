@@ -1,6 +1,7 @@
 import numpy as np
 from os.path import join
 from random import sample
+import scipy.misc
 
 from src.data_generator.data_gen_utils import read_random_images_from_directory
 from src.model_config import IMAGE_WIDTH, IMAGE_HEIGHT, NUM_CHANNELS, MARGIN
@@ -34,7 +35,7 @@ def _triples_on_condition(condition, data_dir: str, model: Model, triples_count:
     positives = []
     negatives = []
 
-    for i in np.arange(3):
+    for i in np.arange(1):
         dog_anchor_images = read_random_images_from_directory(dog_dir, imgs_per_iteration_per_class)
         cat_anchor_images = read_random_images_from_directory(cat_dir, imgs_per_iteration_per_class)
 
@@ -54,14 +55,13 @@ def _triples_on_condition(condition, data_dir: str, model: Model, triples_count:
             negative_dist = prediction_to_negative_dist(predictions[j])
 
             if condition(positive_dist, negative_dist, MARGIN):
-                anchors.append(tmp_anchors[i])
-                positives.append(tmp_positives[i])
-                negatives.append(tmp_negatives[i])
+                anchors.append(tmp_anchors[j])
+                positives.append(tmp_positives[j])
+                negatives.append(tmp_negatives[j])
 
                 if len(anchors) == triples_count:
                     assert len(anchors) == len(positives) == len(negatives)
-                    high_margin = False
-                    return np.array(anchors), np.array(positives), np.array(negatives), high_margin
+                    return np.array(anchors), np.array(positives), np.array(negatives)
 
     print("Triples had to be filled with %d random triples out of %d" % (triples_count - len(anchors), triples_count))
     random_anchors, random_positive, random_negative = random_triples(data_dir, triples_count - len(anchors),
@@ -69,8 +69,20 @@ def _triples_on_condition(condition, data_dir: str, model: Model, triples_count:
     anchors = np.array(anchors + random_anchors)
     positives = np.array(positives + random_positive)
     negatives = np.array(negatives + random_negative)
-    high_margin = True
-    return anchors, positives, negatives, high_margin
+
+    import os
+    os.mkdir("anchors")
+    os.mkdir("positives")
+    os.mkdir("negatives")
+    i = 0
+    for a, p, n in zip(anchors, positives, negatives):
+        scipy.misc.imsave('anchors/%s.jpg' % i, a)
+        scipy.misc.imsave('positives/%s.jpg' % i, p)
+        scipy.misc.imsave('negatives/%s.jpg' % i, n)
+
+        i += 1
+
+    return anchors, positives, negatives
 
 
 def _choose_directories(dirs, i):
