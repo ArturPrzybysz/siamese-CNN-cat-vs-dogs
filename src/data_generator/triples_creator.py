@@ -8,17 +8,17 @@ from src.model_config import IMAGE_WIDTH, IMAGE_HEIGHT, NUM_CHANNELS, MARGIN
 from tensorflow.python.keras import Model
 
 
-def hard_triples(data_dir: str, model: Model, triples_count: int):
+def semi_hard_triples(data_dir: str, model: Model, triples_count: int):
     dog_dir = join(data_dir, "dogs")
     cat_dir = join(data_dir, "cats")
 
-    imgs_per_iteration_per_class = triples_count//2
+    imgs_per_iteration_per_class = triples_count // 2
 
     anchors = []
     positives = []
     negatives = []
 
-    for i in np.arange(10):
+    for i in np.arange(3):
         dog_anchor_images = read_random_images_from_directory(dog_dir, imgs_per_iteration_per_class)
         cat_anchor_images = read_random_images_from_directory(cat_dir, imgs_per_iteration_per_class)
 
@@ -37,7 +37,7 @@ def hard_triples(data_dir: str, model: Model, triples_count: int):
             positive_dist = predictions[j, 0, 0]
             negative_dist = predictions[j, 1, 0]
 
-            if positive_dist + MARGIN < negative_dist:
+            if positive_dist < negative_dist < positive_dist + MARGIN:
                 anchors.append(tmp_anchors[i])
                 positives.append(tmp_positives[i])
                 negatives.append(tmp_negatives[i])

@@ -5,6 +5,14 @@ from PIL import Image
 from src.model_config import IMAGE_EXTENSION
 
 
+def prediction_to_positive_dist(prediction):
+    return prediction[0][0]
+
+
+def prediction_to_negative_dist(prediction):
+    return prediction[1][0]
+
+
 def split_test(directory):
     dog_directory = join(directory, "dogs")
     cat_directory = join(directory, "cats")

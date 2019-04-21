@@ -1,17 +1,16 @@
-import numpy as np
+from src.utils import prediction_to_positive_dist, prediction_to_negative_dist
 
 
-def evaluate_model(model, evaluated_pairs):
-    dogs, cats = evaluated_pairs
-    dummy_anchors = np.zeros_like(dogs)
+def evaluate_model(model, evaluated_triples):
+    anchors, positives, negatives = evaluated_triples
+    predictions = model.predict([anchors, positives, negatives])
+    correct = 0
+    _all = 0
+    for prediction in predictions:
+        positive_dist = prediction_to_positive_dist(prediction)
+        negative_dist = prediction_to_negative_dist(prediction)
+        _all += 1
+        if positive_dist < negative_dist:
+            correct += 1
 
-    response = model.predict([dummy_anchors, dogs, cats])
-    dogs_vs_cats_dist = response[:, 2, :]
-
-    response = model.predict([dummy_anchors, dogs, np.flip(dogs)])
-    dogs_vs_dogs_dist = response[:, 2, :]
-
-    response = model.predict([dummy_anchors, cats, np.flip(cats)])
-    cats_vs_cats_dist = response[:, 2, :]
-
-    return np.mean(dogs_vs_cats_dist), np.mean(dogs_vs_dogs_dist), np.mean(cats_vs_cats_dist)
+    return correct / _all

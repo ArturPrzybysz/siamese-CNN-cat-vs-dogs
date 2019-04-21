@@ -8,14 +8,14 @@ from tensorflow.python.keras.layers import Dropout
 from src.model_config import MARGIN, LR
 
 
-def _triplet_loss(y_true, y_pred):
+def _triplet_loss(_, y_pred):
     margin = K.constant(MARGIN)
-    positive_dist = y_pred[:, 0, :]
-    negative_dist = y_pred[:, 1, :]
+    positive_dist = y_pred[:, 0, 0]
+    negative_dist = y_pred[:, 1, 0]
 
-    basic_loss = positive_dist + margin - negative_dist
+    basic_loss = K.square(positive_dist) - K.square(negative_dist) + margin
 
-    return K.mean(K.maximum(K.constant(0), basic_loss))
+    return K.sum(K.maximum(K.constant(0), basic_loss))
 
 
 def siamese_model(input_shape, encoding_size):
@@ -25,21 +25,19 @@ def siamese_model(input_shape, encoding_size):
 
     model = Sequential()
 
-    model.add(Conv2D(24, (5, 5),
+    model.add(Conv2D(32, (7, 7),
                      activation='relu', input_shape=input_shape, kernel_initializer=glorot_normal()))
     model.add(MaxPooling2D())
 
-    model.add(Conv2D(32, (4, 4), activation='relu', kernel_initializer=glorot_normal()))
+    model.add(Conv2D(64, (5, 5), activation='relu', kernel_initializer=glorot_normal()))
     model.add(MaxPooling2D())
 
-    model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer=glorot_normal()))
+    model.add(Conv2D(128, (3, 3), activation='relu', kernel_initializer=glorot_normal()))
     model.add(MaxPooling2D())
-
-    model.add(Conv2D(82, (2, 2), activation='relu', kernel_initializer=glorot_normal()))
     model.add(Flatten())
 
-    model.add(Dense(64, activation='sigmoid', kernel_initializer=glorot_normal()))
-    model.add(Dropout(0.5))
+    model.add(Dense(1024, activation='sigmoid', kernel_initializer=glorot_normal()))
+    model.add(Dropout(0.3))
 
     model.add(Dense(encoding_size, activation='relu', name='embedding'))
     model.add(Lambda(lambda x: K.l2_normalize(x, axis=1), name='l2_norm'))
@@ -51,13 +49,12 @@ def siamese_model(input_shape, encoding_size):
     L2_dist = Lambda(_euclidean_distance, name='L2_dist')
     positive_dist = L2_dist([encoded_anchor, encoded_positive])
     negative_dist = L2_dist([encoded_anchor, encoded_negative])
-    encodings_dist = L2_dist([encoded_positive, encoded_negative])
 
     stacked_dists = Lambda(lambda v: K.stack(v, axis=1), name='stacked_dists') \
-        ([positive_dist, negative_dist, encodings_dist])
+        ([positive_dist, negative_dist])
 
     model = Model([anchor_input, positive_input, negative_input], stacked_dists, name='siamese')
-    model.compile(optimizer=RMSprop(lr=LR), loss=_triplet_loss, metrics=["accuracy"])
+    model.compile(optimizer=Adam(lr=LR), loss=_triplet_loss)
 
     return model
 

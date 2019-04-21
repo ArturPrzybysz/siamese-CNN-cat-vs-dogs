@@ -14,10 +14,10 @@ TODO: show example input image and describe what are triples (anchor, negative, 
 TODO: describe, citing paper  
 
 ### Evaluation method
-Model is evaluated on validation set after each epoch. Validation set consists of a group of pairs.  
-There are 3 parameters tracked at this point:
-average distance between pairs of: dogs&cat, dog&dog and cat&cat pairs.
-I expect D-C average distance to grow, D-D and C-C distance to lower with subsequent epochs.
+Model is evaluated on a validation set after each epoch. 
+Validation set consists of a group of random triplets.
+I measure distances of ANCHOR-POSITIVE and ANCHOR-NEGATIVE, and count the ratio of positives being closer
+than negative to the whole size of validation set.
 
 #### Related papers, articles and repositories
 ~~https://arxiv.org/pdf/1503.03832.pdf~~  
