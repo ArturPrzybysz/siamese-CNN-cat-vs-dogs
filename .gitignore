@@ -5,7 +5,7 @@ data/*
 !data/dogs-vs-cats/sample_*
 
 .idea
-
+/**/*.h5
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
