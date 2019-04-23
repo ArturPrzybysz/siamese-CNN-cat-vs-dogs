@@ -35,7 +35,7 @@ def _triples_on_condition(condition, data_dir: str, model: Model, triples_count:
     positives = []
     negatives = []
 
-    for i in np.arange(1):
+    for i in np.arange(3):
         dog_anchor_images = read_random_images_from_directory(dog_dir, imgs_per_iteration_per_class)
         cat_anchor_images = read_random_images_from_directory(cat_dir, imgs_per_iteration_per_class)
 
@@ -69,18 +69,6 @@ def _triples_on_condition(condition, data_dir: str, model: Model, triples_count:
     anchors = np.array(anchors + random_anchors)
     positives = np.array(positives + random_positive)
     negatives = np.array(negatives + random_negative)
-
-    import os
-    os.mkdir("anchors")
-    os.mkdir("positives")
-    os.mkdir("negatives")
-    i = 0
-    for a, p, n in zip(anchors, positives, negatives):
-        scipy.misc.imsave('anchors/%s.jpg' % i, a)
-        scipy.misc.imsave('positives/%s.jpg' % i, p)
-        scipy.misc.imsave('negatives/%s.jpg' % i, n)
-
-        i += 1
 
     return anchors, positives, negatives
 

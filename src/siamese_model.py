@@ -1,4 +1,5 @@
 from tensorflow.python.keras import Input, Sequential, Model
+from tensorflow.python.keras._impl.keras.layers import GlobalAveragePooling2D
 from tensorflow.python.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Lambda
 from tensorflow.python.keras.optimizers import Adam, RMSprop
 from tensorflow.python.keras import backend as K
@@ -48,7 +49,7 @@ def siamese_model(input_shape, encoding_size):
         ([positive_dist, negative_dist])
 
     model = Model([anchor_input, positive_input, negative_input], stacked_dists, name='siamese')
-    model.compile(optimizer=Adam(lr=LR), loss=_triplet_loss)
+    model.compile(optimizer=Adam(lr=LR, decay=0.000000065), loss=_triplet_loss)
 
     return model
 
